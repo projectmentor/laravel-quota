@@ -14,16 +14,59 @@ namespace Projectmentor\Quota\Tests;
 use Projectmentor\Quota\PeriodicQuota;
 use GrahamCampbell\TestBench\AbstractPackageTestCase;
 use Illuminate\Support\Facades\Facade;
+//use Projectmentor\Quota\Helpers\MigrateTrait;
+use Orchestra\Database\ConsoleServiceProvider;
+
+use Projectmentor\Quota\QuotaServiceProvider;
 
 //TODO: REFACTOR should extend QuotaTest
 
 class PeriodicQuotaTest extends AbstractPackageTestCase
 {
+
+    //use MigrateTrait;
+    //
     //NOTE: Can't use DatabaseTransactions trait
     //Avoid sqlite "Database Locked" error.
     //use DatabaseTransactions;
 
     protected $backup; //of config/quota.php
+
+    //public function createApplication()
+    //{
+    //    $app = parent::createApplication();
+    //    $app->register(QuotaServiceProvider::class);
+
+    //    //resolves to: 'Orchestra\Testbench\Console\Kernel'
+    //    $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
+
+    //    return $app;
+    //}
+    
+
+    protected function getPackageProviders($app)
+    {
+            return ['Projectmentor\Quota\QuotaServiceProvider'];
+    }
+
+    /**
+     * Define environment setup.
+     * Override Orchestra\TestBench
+     *
+     * @param  \Illuminate\Foundation\Application  $app
+     * @return void
+     */
+    protected function getEnvironmentSetUp($app)
+    {
+        // Setup default database to use sqlite :memory:
+        $app['config']->set('database.default', 'sqlite');
+        $app['config']->set('database.connections.sqlite.database', [
+            'driver'   => 'sqlite',
+            'database' => ':memory:',
+            'prefix'   => '',
+        ]);
+    }
+
 
     /**
      * Setup before each test.
@@ -34,8 +77,20 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
     {
         parent::setUp();
 
-        $this->loadLaravelMigrations(['--database' => 'sqlite']);
-        $this->artisan('migrate', ['--database' => 'sqlite']);
+        //$this->artisan('migrate', ['--database' => 'sqlite']);
+
+        //$this->app['config']->set('database.default','sqlite');
+        //$this->app['config']->set('database.connections.sqlite.database', ':memory:');
+
+        //$this->migrate();
+
+        $realpath = realpath(__DIR__.'/../migrations');
+        dump($realpath);
+
+        $this->loadMigrationsFrom([
+            '--database' => 'sqlite',
+            '--realpath' => $realpath
+        ]);
 
         \DB::table('quotalog')->truncate();
 

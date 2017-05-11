@@ -74,9 +74,10 @@ class QuotaServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //dump(__CLASS__.'::'.__FUNCTION__);
         $this->setupConfig();
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        //$this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
         if ($this->app->runningInConsole()) {
             $this->commands([
@@ -95,14 +96,17 @@ class QuotaServiceProvider extends ServiceProvider
      * @param  array|string  $paths
      * @return void
      */
-    protected function loadMigrationsFrom($paths)
-    {
-        $this->app->afterResolving('migrator', function ($migrator) use ($paths) {
-            foreach ((array) $paths as $path) {
-                $migrator->path($path);
-            }
-        });
-    } 
+    //protected function loadMigrationsFrom($paths)
+    //{
+    //    dump(__CLASS__.'::'.__FUNCTION__);
+
+    //    $this->app->afterResolving('migrator', function ($migrator) use ($paths) {
+    //        foreach ((array) $paths as $path) {
+    //            dump($path);
+    //            $migrator->path($path);
+    //        }
+    //    });
+    //} 
 
     /**
      * Setup the config
