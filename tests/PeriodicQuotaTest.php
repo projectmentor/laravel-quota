@@ -14,7 +14,7 @@ namespace Projectmentor\Quota\Tests;
 use Projectmentor\Quota\PeriodicQuota;
 use GrahamCampbell\TestBench\AbstractPackageTestCase;
 use Illuminate\Support\Facades\Facade;
-//use Projectmentor\Quota\Helpers\MigrateTrait;
+use Projectmentor\Quota\Helpers\MigrateTrait;
 use Orchestra\Database\ConsoleServiceProvider;
 
 use Projectmentor\Quota\QuotaServiceProvider;
@@ -24,7 +24,7 @@ use Projectmentor\Quota\QuotaServiceProvider;
 class PeriodicQuotaTest extends AbstractPackageTestCase
 {
 
-    //use MigrateTrait;
+    use MigrateTrait;
     //
     //NOTE: Can't use DatabaseTransactions trait
     //Avoid sqlite "Database Locked" error.
@@ -32,21 +32,10 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
 
     protected $backup; //of config/quota.php
 
-    //public function createApplication()
-    //{
-    //    $app = parent::createApplication();
-    //    $app->register(QuotaServiceProvider::class);
-
-    //    //resolves to: 'Orchestra\Testbench\Console\Kernel'
-    //    $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
-
-    //    return $app;
-    //}
-    
 
     protected function getPackageProviders($app)
     {
-            return ['Projectmentor\Quota\QuotaServiceProvider'];
+        return ['Projectmentor\Quota\QuotaServiceProvider'];
     }
 
     /**
@@ -58,15 +47,37 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
      */
     protected function getEnvironmentSetUp($app)
     {
-        // Setup default database to use sqlite :memory:
-        $app['config']->set('database.default', 'sqlite');
-        $app['config']->set('database.connections.sqlite.database', [
+        $app->config->set('app.key', 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+
+        $app->config->set('cache.driver', 'array');
+
+        $app->config->set('database.default', 'sqlite');
+        $app->config->set('database.connections.sqlite', [
             'driver'   => 'sqlite',
             'database' => ':memory:',
             'prefix'   => '',
         ]);
+
+        $app->config->set('mail.driver', 'log');
+
+        $app->config->set('session.driver', 'array');
+
     }
 
+
+    protected function loadMigrationsFrom($realpath)
+    {
+//        $options  = is_array($realpath) ? $realpath : ['--realpath' => $realpath];
+//        $database = isset($options['--database']) ? $options['--database'] : null;
+//
+//        $this->artisan('migrate', $options);
+//
+//        $this->beforeApplicationDestroyed(function () use ($database) {
+//            $this->artisan('migrate:rollback', ['--database' => $database]);
+//        });
+
+//        $this->migrate($realpath);
+    }
 
     /**
      * Setup before each test.
@@ -77,24 +88,16 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
     {
         parent::setUp();
 
-        //$this->artisan('migrate', ['--database' => 'sqlite']);
+//        $this->loadMigrationsFrom([
+//            '--database' => 'sqlite',
+//            '--path' => realpath(__DIR__.'/../database/migrations')
+//        ]);
 
-        //$this->app['config']->set('database.default','sqlite');
-        //$this->app['config']->set('database.connections.sqlite.database', ':memory:');
-
-        //$this->migrate();
-
-        $realpath = realpath(__DIR__.'/../migrations');
-        dump($realpath);
-
-        $this->loadMigrationsFrom([
-            '--database' => 'sqlite',
-            '--realpath' => $realpath
-        ]);
+        $this->migrate(realpath(__DIR__.'/../database/migrations'));
 
         \DB::table('quotalog')->truncate();
 
-        $this->backup = \Config::get ('quota.connections');
+        $this->backup = \Config::get('quota.connections');
 
         $override = [ 
             'test' => [
@@ -104,6 +107,7 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
                 'timezone' =>  'America/Los_Angeles'
             ],
         ];
+
         \Config::set('quota.connections', $override);
     }
 
