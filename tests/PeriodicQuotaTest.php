@@ -14,7 +14,7 @@ namespace Projectmentor\Quota\Tests;
 use Projectmentor\Quota\PeriodicQuota;
 use GrahamCampbell\TestBench\AbstractPackageTestCase;
 use Illuminate\Support\Facades\Facade;
-//use Projectmentor\Quota\Helpers\MigrateTrait;
+use Projectmentor\Quota\Helpers\MigrateTrait;
 use Orchestra\Database\ConsoleServiceProvider;
 
 use Projectmentor\Quota\QuotaServiceProvider;
@@ -24,7 +24,7 @@ use Projectmentor\Quota\QuotaServiceProvider;
 class PeriodicQuotaTest extends AbstractPackageTestCase
 {
 
-    //use MigrateTrait;
+    use MigrateTrait;
     //
     //NOTE: Can't use DatabaseTransactions trait
     //Avoid sqlite "Database Locked" error.
@@ -67,14 +67,16 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
 
     protected function loadMigrationsFrom($realpath)
     {
-        $options  = is_array($realpath) ? $realpath : ['--realpath' => $realpath];
-        $database = isset($options['--database']) ? $options['--database'] : null;
+//        $options  = is_array($realpath) ? $realpath : ['--realpath' => $realpath];
+//        $database = isset($options['--database']) ? $options['--database'] : null;
+//
+//        $this->artisan('migrate', $options);
+//
+//        $this->beforeApplicationDestroyed(function () use ($database) {
+//            $this->artisan('migrate:rollback', ['--database' => $database]);
+//        });
 
-        $this->artisan('migrate', $options);
-
-        $this->beforeApplicationDestroyed(function () use ($database) {
-            $this->artisan('migrate:rollback', ['--database' => $database]);
-        });
+//        $this->migrate($realpath);
     }
 
     /**
@@ -86,10 +88,12 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
     {
         parent::setUp();
 
-        $this->loadMigrationsFrom([
-            '--database' => 'sqlite',
-            '--path' => realpath(__DIR__.'/../database/migrations')
-        ]);
+//        $this->loadMigrationsFrom([
+//            '--database' => 'sqlite',
+//            '--path' => realpath(__DIR__.'/../database/migrations')
+//        ]);
+
+        $this->migrate(realpath(__DIR__.'/../database/migrations'));
 
         \DB::table('quotalog')->truncate();
 
