@@ -43,12 +43,14 @@
         "graham-campbell/testbench": "^3.2",
         "mockery/mockery": "0.9.*",
         "orchestra/testbench": "^3.2",
+        "orchestra/database": "~3.1",
         "phpspec/phpspec": "~2.1",
         "phpunit/dbunit": "^2.0",
         "phpunit/phpunit": "^5.2",
         "symfony/console": "^3.0",
         "mikey179/vfsStream": "^1.5.0",
-        "squizlabs/php_codesniffer": "2.*"
+        "squizlabs/php_codesniffer": "2.*",
+        "illuminate/filesystem": "5.2.45"
     },
     "autoload": {
         "psr-4": {
@@ -66,9 +68,6 @@
         "fix-style": "vendor/bin/phpcbf -p --standard=PSR2 --runtime-set ignore_errors_on_exit 1 --runtime-set ignore_warnings_on_exit 1 src tests"
     },
     "extra": {
-        "branch-alias": {
-            "dev-master": "1.0-dev"
-        }
     },
     "config": {
         "sort-packages": true
