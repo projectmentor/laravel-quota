@@ -48,11 +48,9 @@ class ResetQuotaLog extends Command
      */
     public function handle()
     {
-        switch(DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME))
-        {
-        case 'mysql':
-
-            $sql = 'INSERT INTO quotalog' .
+        switch (DB::connection()->getPDO()->getAttribute(\PDO::ATTR_DRIVER_NAME)) {
+            case 'mysql':
+                $sql = 'INSERT INTO quotalog' .
                 ' (date, connection, hits, misses, created_at, updated_at)' .
                 ' VALUES' .
                 ' ( :date, :connection, :hits, :misses, :created_at, :updated_at)' .
@@ -61,55 +59,54 @@ class ResetQuotaLog extends Command
                 ' misses = VALUES(misses),' .
                 ' updated_at = VALUES(updated_at)';
 
-            $this->doUpsertStatement($sql);
+                $this->doUpsertStatement($sql);
 
-            break;
-        case 'sqlite':
+                break;
+            case 'sqlite':
+                $date = $this->argument('date');
+                $connection = $this->argument('connection');
 
-            $date = $this->argument('date');
-            $connection = $this->argument('connection');
-
-            $sql = 'UPDATE quotalog' .
+                $sql = 'UPDATE quotalog' .
                 ' SET `date` = :date' .
                 ', `connection` = :connection' .
-                ', `hits` = :hits' . 
+                ', `hits` = :hits' .
                 ', `misses` = :misses' .
                 ', `updated_at` = :updated_at' .
                 ' WHERE `date` = ' . '\''. $date . '\'' .
                 ' AND `connection` = ' . '\'' . $connection . '\'';
 
-            $this->doUpdateStatement($sql);
+                $this->doUpdateStatement($sql);
 
-            $changes = DB::select('SELECT changes()');
-            if(! $this->sqliteUpdateDidChange($changes))
-            {
-                $sql = 'INSERT INTO quotalog' .
-                  ' (' .
-                  ' `date`' .
-                  ', `connection`' .
-                  ', `hits`' .
-                  ', `misses`' .
-                  ', `created_at`' .
-                  ', `updated_at`' .
-                  ')' . 
-                  ' VALUES' .
-                  ' (' . 
-                  ' :date' .
-                  ', :connection' .
-                  ', :hits' .
-                  ', :misses' .
-                  ', :created_at' .  
-                  ', :updated_at' .
-                  ')';
+                $changes = DB::select('SELECT changes()');
+                if (! $this->sqliteUpdateDidChange($changes)) {
+                    $sql = 'INSERT INTO quotalog' .
+                      ' (' .
+                      ' `date`' .
+                      ', `connection`' .
+                      ', `hits`' .
+                      ', `misses`' .
+                      ', `created_at`' .
+                      ', `updated_at`' .
+                      ')' .
+                      ' VALUES' .
+                      ' (' .
+                      ' :date' .
+                      ', :connection' .
+                      ', :hits' .
+                      ', :misses' .
+                      ', :created_at' .
+                      ', :updated_at' .
+                      ')';
 
-                $this->doUpsertStatement($sql);
-            }
-            break;
+                    $this->doUpsertStatement($sql);
+                }
+                break;
 
-        default:
-            throw new \ErrorException(
-                __CLASS__.'::'.__FUNCTION__.
-                ' Driver: ' . $driver . ' not supported.');
+            default:
+                throw new \ErrorException(
+                    __CLASS__.'::'.__FUNCTION__.
+                    ' Driver: ' . $driver . ' not supported.'
+                );
         }
     }
 
@@ -138,7 +135,7 @@ class ResetQuotaLog extends Command
     /**
      * Helper. avoid duplicate code
      * Run insert or update statement.
-     * 
+     *
      * @param string $sql
      * @return void
      */
@@ -160,7 +157,7 @@ class ResetQuotaLog extends Command
      * Get the status of a sqlite3 UPDATE operation
      * from native stdClass
      *
-     * 
+     *
      * @param array $changes e.g:
      *     [ 0 => { "changes()": 1 }]
      * @return boolean

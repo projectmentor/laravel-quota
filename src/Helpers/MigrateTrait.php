@@ -37,7 +37,7 @@ trait MigrateTrait
      *
      * @return void
      */
-    public function migrate($path=null, $files=[])
+    public function migrate($path = null, $files = [])
     {
         //default migration path;
         $this->migrations_path = base_path('database/migrations');
@@ -46,24 +46,20 @@ trait MigrateTrait
         $fileSystem = app(Filesystem::class);
         $classFinder = app(ClassFinder::class);
 
-        if(!empty($files)){
+        if (!empty($files)) {
             //run specific files
 
-            foreach($files as $file)
-            {
+            foreach ($files as $file) {
                 $file = $this->migrations_path . "/" . $file;
 
                 $fileSystem->requireOnce($file);
                 $migrationClass = $classFinder->findClass($file);
                 (new $migrationClass)->up();
             }
-
-        }else{
-
+        } else {
             \Log::info($fileSystem->files($this->migrations_path));
 
-            foreach($fileSystem->files($this->migrations_path) as $file)
-            {
+            foreach ($fileSystem->files($this->migrations_path) as $file) {
                 $fileSystem->requireOnce($file);
 //                var_dump($file);
                 $migrationClass = $classFinder->findClass($file);
@@ -71,6 +67,4 @@ trait MigrateTrait
             }
         }
     }
-
-
 }

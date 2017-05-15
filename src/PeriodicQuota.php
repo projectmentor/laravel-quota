@@ -27,7 +27,7 @@ use Carbon\Carbon;
  * for allowed period types.
  */
 
-class PeriodicQuota extends Quota 
+class PeriodicQuota extends Quota
 {
     /**
      * The timezone authority.
@@ -58,8 +58,9 @@ class PeriodicQuota extends Quota
         $this->index = 'quota.connections.' . $connection;
 
         $this->timezone = config($this->index . '.timezone');
-        if(is_null($this->timezone))
+        if (is_null($this->timezone)) {
             $this->timezone = config('quota.default_timezone');
+        }
 
         $this->log_table = config($this->index . '.log_table');
 
@@ -74,11 +75,12 @@ class PeriodicQuota extends Quota
             '  AND connection = ' . '\'' . $connection . '\''
         );
 
-        if(empty($log_records))
+        if (empty($log_records)) {
             \Artisan::call('quota:reset', [
                 'date' => $date,
                 'connection' =>  $connection
             ]);
+        }
     }
 
     public function enforce()
@@ -157,15 +159,13 @@ class PeriodicQuota extends Quota
         $stats = $this->getStats($date);
         $hits = (integer) $stats->hits;
 
-        if($this->limit < ($hits + 1))
-        {
-           $this->miss($stats->misses);
-           throw new \ErrorException(
-               __CLASS__ . '::' . __FUNCTION__ .
-               ' Overquota. Exceeded daily limit: ' . $this->limit);
-        }
-        else
-        {
+        if ($this->limit < ($hits + 1)) {
+            $this->miss($stats->misses);
+            throw new \ErrorException(
+                __CLASS__ . '::' . __FUNCTION__ .
+                ' Overquota. Exceeded daily limit: ' . $this->limit
+            );
+        } else {
             $this->hit($stats->hits);
             $result = true;
         }

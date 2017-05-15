@@ -61,7 +61,6 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
         $app->config->set('mail.driver', 'log');
 
         $app->config->set('session.driver', 'array');
-
     }
 
 
@@ -99,7 +98,7 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
 
         $this->backup = \Config::get('quota.connections');
 
-        $override = [ 
+        $override = [
             'test' => [
                 'limit' => 10,
                 'period' => 'day',
@@ -183,8 +182,7 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
         $stats = $quota->getStats($quota->dateInTimezone());
         $this->assertEquals(0, $stats->hits);
         $this->assertEquals(0, $stats->misses);
-
-    } 
+    }
 
     /**
      * @test
@@ -217,7 +215,7 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
         );
 
         $this->assertEquals($hits + 1, $results[0]->hits);
-    } 
+    }
 
     /**
      * @test
@@ -293,8 +291,7 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
         $limit = $quota->getLimit();
 
         $this->expectException(\ErrorException::class);
-        for($i = 0; $i < limit + 1; $i++)
-        {    
+        for ($i = 0; $i < limit + 1; $i++) {
             $quota->consume();
         }
     }
@@ -340,10 +337,8 @@ class PeriodicQuotaTest extends AbstractPackageTestCase
         $limit = $quota->getLimit();
 
         $this->expectException(\ErrorException::class);
-        for($i = 0; $i < limit + 1; $i++)
-        {    
+        for ($i = 0; $i < limit + 1; $i++) {
             $quota->enforce();
         }
     }
 }
-

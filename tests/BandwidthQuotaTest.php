@@ -35,9 +35,9 @@ class BandwidthQuotaTest extends AbstractTestCase
     {
         parent::setUp();
 
-        $this->backup = \Config::get ('quota.connections');
+        $this->backup = \Config::get('quota.connections');
 
-        $override = [ 
+        $override = [
             'test' => [
                 'limit' =>  60,
                 'period' => 'second',
@@ -94,23 +94,31 @@ class BandwidthQuotaTest extends AbstractTestCase
         $storage = $quota->getStorage();
 
         $this->assertNotNull($storage);
-        $this->assertEquals('bandwidthThrottle\tokenBucket\storage\FileStorage',
-            get_class($storage));
+        $this->assertEquals(
+            'bandwidthThrottle\tokenBucket\storage\FileStorage',
+            get_class($storage)
+        );
 
         $rate = $quota->getRate();
         $this->assertNotNull($rate);
-        $this->assertEquals('bandwidthThrottle\tokenBucket\Rate',
-            get_class($rate));
+        $this->assertEquals(
+            'bandwidthThrottle\tokenBucket\Rate',
+            get_class($rate)
+        );
 
         $bucket = $quota->getBucket();
         $this->assertNotNull($bucket);
-        $this->assertEquals('bandwidthThrottle\tokenBucket\TokenBucket',
-            get_class($bucket));
+        $this->assertEquals(
+            'bandwidthThrottle\tokenBucket\TokenBucket',
+            get_class($bucket)
+        );
 
         $blocker = $quota->getBlocker();
         $this->assertNotNull($blocker);
-        $this->assertEquals('bandwidthThrottle\tokenBucket\BlockingConsumer',
-            get_class($blocker));
+        $this->assertEquals(
+            'bandwidthThrottle\tokenBucket\BlockingConsumer',
+            get_class($blocker)
+        );
     }
 
     /**
@@ -119,15 +127,15 @@ class BandwidthQuotaTest extends AbstractTestCase
      * @group classes_quota
      * @group classes_quota_bandwidth
      */
-   public function testBandwidthQuotaBlocks()
-   {
+    public function testBandwidthQuotaBlocks()
+    {
         $quota = new BandwidthQuota('test');
         $blocker = $quota->getBlocker();
 
         $time_start = microtime(true);
 
         //underquota won't block.
-        $blocker->consume(1); 
+        $blocker->consume(1);
         
         $time_end = microtime(true);
         $time = $time_end - $time_start;
@@ -140,14 +148,12 @@ class BandwidthQuotaTest extends AbstractTestCase
         
         $blocker->consume(60);
 
-        //overquota should block. 
-        $blocker->consume(60); 
+        //overquota should block.
+        $blocker->consume(60);
         
         $time_end = microtime(true);
         $time = $time_end - $time_start;
         
         $this->assertTrue($time > 1);
-
-   } 
+    }
 }
-

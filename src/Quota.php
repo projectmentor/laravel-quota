@@ -93,8 +93,9 @@ class Quota implements QuotaInterface
         $result = false;
         $constants = $this->validPeriods();
         $values = array_values($constants);
-        if(in_array($period, $values))
+        if (in_array($period, $values)) {
             $result = true;
+        }
         return $result;
     }
 
@@ -102,8 +103,8 @@ class Quota implements QuotaInterface
     * Public interface.
     *
     * NOTE: this class and method are really abstract,
-    * but we leave it instantiable for easier testing. 
-    */ 
+    * but we leave it instantiable for easier testing.
+    */
     public function enforce()
     {
         //Override this in descendants.
@@ -189,19 +190,19 @@ class Quota implements QuotaInterface
      * @param string \bandwidthThrottle\tokenBucket\Rate::CONSTANT
      * @return void
      * @throws InvalidArgumentException
-     * 
+     *
      */
     public function setPeriod($period)
     {
-        if(! $this->validatePeriod($period))
-        {
+        if (! $this->validatePeriod($period)) {
             $expected = $this->validPeriods();
 
             throw new \InvalidArgumentException(
                 __CLASS__.'::'.__FUNCTION__.
-                ' Invalid period: ' . $period . 
+                ' Invalid period: ' . $period .
                 ' in connection configuration: ' . $this->connection .
-                ' expected one of: ' . PHP_EOL . print_r($expected,1));
+                ' expected one of: ' . PHP_EOL . print_r($expected, 1)
+            );
         }
 
         $this->period = $period;

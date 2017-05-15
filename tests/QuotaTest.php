@@ -30,9 +30,9 @@ class QuotaTest extends AbstractTestCase
     {
         parent::setUp();
 
-        $this->backup = \Config::get ('quota.connections');
+        $this->backup = \Config::get('quota.connections');
 
-        $override = [ 
+        $override = [
             'test' => [
                 'limit' => 2500,
                 'period' => 'day',
@@ -100,8 +100,8 @@ class QuotaTest extends AbstractTestCase
      * @group classes_quota
      * @group classes_quota_base
      */
-   public function testValidPeriodsReturnsRateConstants()
-   {
+    public function testValidPeriodsReturnsRateConstants()
+    {
         $reference = \bandwidthThrottle\tokenBucket\Rate::class;
         $reflector = new \ReflectionClass($reference);
         $expected = json_encode($reflector->getConstants());
@@ -110,7 +110,7 @@ class QuotaTest extends AbstractTestCase
         $result = json_encode($quota->validPeriods());
 
         $this->assertEquals($expected, $result);
-   } 
+    }
 
     /**
      * @test
@@ -118,11 +118,10 @@ class QuotaTest extends AbstractTestCase
      * @group classes_quota
      * @group classes_quota_base
      */
-   public function testEnforceThrowsException()
-   {    
+    public function testEnforceThrowsException()
+    {
         $quota = new Quota('test');
         $this->expectException(\Exception::class);
         $quota->enforce();
-   }
+    }
 }
-
