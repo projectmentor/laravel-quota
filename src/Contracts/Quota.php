@@ -19,5 +19,5 @@ interface Quota
     /**
      * Enforce a quota.
      */
-    public function enforce();       
+    public function enforce();
 }
