@@ -61,7 +61,7 @@ class QuotaServiceProvider extends ServiceProvider
      * Indicates if loading of the provider is deferred.
      *
      * NOTE: Since we are also configuring at boot time
-     * we can not defer. 
+     * we can not defer.
      *
      * @var bool
      */
@@ -84,7 +84,7 @@ class QuotaServiceProvider extends ServiceProvider
                 ResetQuotaLog::class,
                 TruncateQuotaLog::class,
             ]);
-        } 
+        }
     }
 
      /**
@@ -106,7 +106,7 @@ class QuotaServiceProvider extends ServiceProvider
     //            $migrator->path($path);
     //        }
     //    });
-    //} 
+    //}
 
     /**
      * Setup the config
@@ -201,26 +201,26 @@ class QuotaServiceProvider extends ServiceProvider
      * Register application classes.
      *
      * TODO: REFACTOR Binding with parameters is not
-     * Best practice. 
+     * Best practice.
      * @See https://github.com/laravel/internals/issues/391
      *
      * @return void
      */
     protected function registerClasses()
     {
-        $this->app->bind('quota.storage.file', function($app, $params){
+        $this->app->bind('quota.storage.file', function ($app, $params) {
             return new FileStorage($params['path']);
         });
 
-        $this->app->bind('quota.rate', function($app, $params){
+        $this->app->bind('quota.rate', function ($app, $params) {
             return new Rate($params['limit'], $params['period']);
         });
 
-        $this->app->bind('quota.bucket', function($app, $params){
+        $this->app->bind('quota.bucket', function ($app, $params) {
             return new TokenBucket($params['capacity'], $params['rate'], $params['storage']);
         });
 
-        $this->app->bind('quota.blocker', function($app, $params){
+        $this->app->bind('quota.blocker', function ($app, $params) {
             return new BlockingConsumer($params['bucket']);
         });
 

@@ -16,21 +16,20 @@ use \bandwidthThrottle\tokenBucket\Rate;
 use \bandwidthThrottle\tokenBucket\TokenBucket;
 use \bandwidthThrottle\tokenBucket\BlockingConsumer;
 
-
 /**
  * This is the BandwidthQuota class.
  * It provides rate-of-flow quota restriction
  * e.g. limit api requests to 60/second.
  *
  * Currently only support FileStorage type
- * of persistance. 
+ * of persistance.
  */
 
-class BandwidthQuota extends Quota 
+class BandwidthQuota extends Quota
 {
     /**
      * The driver shortcut name as known to the IoC.
-     * 
+     *
      * @var string
      */
     protected $driver;
@@ -91,16 +90,19 @@ class BandwidthQuota extends Quota
         $this->driver = config($this->index . '.driver');
 
         //TODO: REFACTOR for multiple storage types.
-        if($this->driver != 'quota.storage.file')
+        if ($this->driver != 'quota.storage.file') {
             throw new \Exception('Driver: ' . $this->driver . ' not supported.');
+        }
 
         $this->path = config($this->index . '.path');
         $this->storage = app($this->driver, ['path' =>  $this->path]);
         //END REFACTOR
 
         //Resolve rate via IoC container.
-        $this->rate = app('quota.rate',
-            ['limit' => $this->limit, 'period' => $this->period]);
+        $this->rate = app(
+            'quota.rate',
+            ['limit' => $this->limit, 'period' => $this->period]
+        );
 
         //Resolve bucket via IoC container.
         $capacity = config($this->index . '.capacity');
@@ -114,8 +116,7 @@ class BandwidthQuota extends Quota
         $this->bucket->bootstrap($capacity);
 
         //Optionally enclose bucket within a blocking consumer.
-        if(config($this->index . '.block') == TRUE)
-        {
+        if (config($this->index . '.block') == true) {
             $this->blocker = app('quota.blocker', ['bucket' => $this->bucket]);
         }
     }
@@ -175,18 +176,16 @@ class BandwidthQuota extends Quota
      */
     public function consume($tokens = 1)
     {
-        if(isset($this->bucket))
-        {
-            if (! isset($this->blocker))
-            {
+        if (isset($this->bucket)) {
+            if (! isset($this->blocker)) {
                 $result = $this->bucket->consume($tokens, $seconds);
-                if( $result === false)
+                if ($result === false) {
                     throw new \ErrorException(
                         __CLASS__ . '::' . __FUNCTION__ .
-                        ' Overquota. Exceeded bandwidth. Wait ' . $seconds . ' seconds.');
-            }
-            else
-            {
+                        ' Overquota. Exceeded bandwidth. Wait ' . $seconds . ' seconds.'
+                    );
+                }
+            } else {
                 $result = $this->blocker->consume($tokens);
             }
         }
@@ -203,14 +202,17 @@ class BandwidthQuota extends Quota
      */
     public function release()
     {
-        if (isset($this->blocker))
+        if (isset($this->blocker)) {
             unset($this->blocker);
+        }
 
-        if (isset($this->bucket))
+        if (isset($this->bucket)) {
             unset($this->bucket);
+        }
 
-        if (isset($this->rate))
+        if (isset($this->rate)) {
             unset($this->rate);
+        }
     }
 
     /**
@@ -221,8 +223,7 @@ class BandwidthQuota extends Quota
      */
     public function remove()
     {
-        if(isset($this->storage))
-        {
+        if (isset($this->storage)) {
             $this->storage->remove();
             unset($this->storage);
         }
