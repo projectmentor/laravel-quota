@@ -12,16 +12,12 @@
 namespace Projectmentor\Quota\Contracts;
 
 /**
- * This is the quota factory interface.
- *
- * @author David Faith <david@projectmentor.org>
+ * This is the quota interface.
  */
-interface RateInterface
+interface Quota
 {
     /**
-     * Return the rate in tokens per second
-     *
-     * @return double
+     * Enforce a quota.
      */
-    public function getTokensPerSecond();
+    public function enforce();
 }

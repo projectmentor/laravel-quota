@@ -11,15 +11,15 @@
 
 namespace Projectmentor\Quota;
 
-use bandwidthThrottle\tokenBucket\Rate;
-use bandwidthThrottle\tokenBucket\TokenBucket;
-use bandwidthThrottle\tokenBucket\BlockingConsumer;
-use bandwidthThrottle\tokenBucket\storage\FileStorage;
-
 use Illuminate\Foundation\Application as LaravelApplication;
 use Laravel\Lumen\Application as LumenApplication;
 
 use Illuminate\Support\ServiceProvider;
+
+use bandwidthThrottle\tokenBucket\Rate;
+use bandwidthThrottle\tokenBucket\TokenBucket;
+use bandwidthThrottle\tokenBucket\BlockingConsumer;
+use bandwidthThrottle\tokenBucket\storage\FileStorage;
 
 use Projectmentor\Quota\Factories\RateFactory;
 use Projectmentor\Quota\Factories\FileStorageFactory;
@@ -30,6 +30,9 @@ use Projectmentor\Quota\Stubs\RateData;
 use Projectmentor\Quota\Stubs\FileStorageData;
 use Projectmentor\Quota\Stubs\TokenBucketData;
 use Projectmentor\Quota\Stubs\BlockingConsumerData;
+
+use Projectmentor\Quota\Console\Commands\ResetQuotaLog;
+use Projectmentor\Quota\Console\Commands\TruncateQuotaLog;
 
 /**
  * This is the Quota service provider.
@@ -57,9 +60,12 @@ class QuotaServiceProvider extends ServiceProvider
     /**
      * Indicates if loading of the provider is deferred.
      *
+     * NOTE: Since we are also configuring at boot time
+     * we can not defer.
+     *
      * @var bool
      */
-    protected $defer = true;
+    protected $defer = false;
 
     /**
      * Perform post-registration booting of services.
@@ -68,8 +74,39 @@ class QuotaServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        //dump(__CLASS__.'::'.__FUNCTION__);
         $this->setupConfig();
+
+        //$this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                ResetQuotaLog::class,
+                TruncateQuotaLog::class,
+            ]);
+        }
     }
+
+     /**
+     * Register a database migration path.
+     *
+     * NOTE: This function is already part of 5.4
+     * it is backported here for 5.2
+     *
+     * @param  array|string  $paths
+     * @return void
+     */
+    //protected function loadMigrationsFrom($paths)
+    //{
+    //    dump(__CLASS__.'::'.__FUNCTION__);
+
+    //    $this->app->afterResolving('migrator', function ($migrator) use ($paths) {
+    //        foreach ((array) $paths as $path) {
+    //            dump($path);
+    //            $migrator->path($path);
+    //        }
+    //    });
+    //}
 
     /**
      * Setup the config
@@ -99,6 +136,7 @@ class QuotaServiceProvider extends ServiceProvider
     {
         $this->bindInterfaces();
         $this->registerFactories();
+        $this->registerClasses();
     }
 
     /**
@@ -160,6 +198,43 @@ class QuotaServiceProvider extends ServiceProvider
     }
 
     /**
+     * Register application classes.
+     *
+     * TODO: REFACTOR Binding with parameters is not
+     * Best practice.
+     * @See https://github.com/laravel/internals/issues/391
+     *
+     * @return void
+     */
+    protected function registerClasses()
+    {
+        $this->app->bind('quota.storage.file', function ($app, $params) {
+            return new FileStorage($params['path']);
+        });
+
+        $this->app->bind('quota.rate', function ($app, $params) {
+            return new Rate($params['limit'], $params['period']);
+        });
+
+        $this->app->bind('quota.bucket', function ($app, $params) {
+            return new TokenBucket($params['capacity'], $params['rate'], $params['storage']);
+        });
+
+        $this->app->bind('quota.blocker', function ($app, $params) {
+            return new BlockingConsumer($params['bucket']);
+        });
+
+        $this->app->alias('quota.storage.file', FileStorage::class);
+        $this->app->alias('quota.storage.file', StorageInterface::class);
+
+        $this->app->alias('quota.rate', Rate::class);
+
+        $this->app->alias('quota.bucket', Tokenbucket::class);
+
+        $this->app->alias('quota.blocker', BlockingConsumer::class);
+    }
+
+    /**
      * Get the services provided by this provider.
      *
      * @return string[]
@@ -170,7 +245,11 @@ class QuotaServiceProvider extends ServiceProvider
             'quota.factory.rate',
             'quota.factory.storage.file',
             'quota.factory.tokenbucket',
-            'quota.factory.blockingconsumer'
+            'quota.factory.blockingconsumer',
+            'quota.storage.file',
+            'quota.rate',
+            'quota.bucket',
+            'quota.blocker'
         ];
     }
 }
